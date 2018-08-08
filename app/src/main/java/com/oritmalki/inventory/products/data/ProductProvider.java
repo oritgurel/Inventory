@@ -176,14 +176,43 @@ public class ProductProvider extends ContentProvider {
     }
 
 
+    @Override
+    public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
+        SQLiteDatabase database = mDbHelper.getWritableDatabase();
+        int rowsDeleted;
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case PRODUCTS:
+                rowsDeleted = database.delete(ProductsContract.ProductEntry.TABLE_NAME, selection, selectionArgs);
+                break;
+            case PRODUCT_ID:
+                selection = ProductsContract.ProductEntry._ID + "=?";
+                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
+                rowsDeleted = database.delete(ProductsContract.ProductEntry.TABLE_NAME, selection, selectionArgs);
+                break;
+            default:
+                throw new IllegalArgumentException("Deletion is not supported for " + uri);
+        }
+
+        if (rowsDeleted != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
+        return rowsDeleted;
+    }
+
         @Nullable
     @Override
     public String getType(@NonNull Uri uri) {
-        return null;
-    }
+            final int match = sUriMatcher.match(uri);
+            switch (match) {
+                case PRODUCTS:
+                    return ProductsContract.ProductEntry.CONTENT_LIST_TYPE;
+                case PRODUCT_ID:
+                    return ProductsContract.ProductEntry.CONTENT_ITEM_TYPE;
+                default:
+                    throw new IllegalStateException("Unknown URI " + uri + " with match " + match);
+            }
 
-    @Override
-    public int delete(@NonNull Uri uri, @Nullable String s, @Nullable String[] strings) {
-        return 0;
-    }
+        }
 }
