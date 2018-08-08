@@ -11,6 +11,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import java.util.regex.Pattern;
+
 public class ProductProvider extends ContentProvider {
 
     public static final String LOG_TAG = ProductProvider.class.getSimpleName();
@@ -84,6 +86,9 @@ public class ProductProvider extends ContentProvider {
         }
 
         String supplierPhoneNumber = values.getAsString(ProductsContract.ProductEntry.COLUMN_SUPPLIER_PHONE_NUMBER);
+        if (!Pattern.matches(PHONE_REGEX, supplierPhoneNumber)) {
+            throw new IllegalArgumentException("Product requires 10 digit supplier phone number");
+        }
 
 
         SQLiteDatabase database = mDbHelper.getWritableDatabase();
