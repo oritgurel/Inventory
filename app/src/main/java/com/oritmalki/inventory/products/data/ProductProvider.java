@@ -60,7 +60,13 @@ public class ProductProvider extends ContentProvider {
     @Nullable
     @Override
     public Uri insert(@NonNull Uri uri, @Nullable ContentValues contentValues) {
-        return null;
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case PRODUCTS:
+                return insertProduct(uri, contentValues);
+            default:
+                throw new IllegalArgumentException("Insertion is not supported for " + uri);
+        }
     }
 
     private Uri insertProduct(Uri uri, ContentValues values) {
@@ -104,7 +110,73 @@ public class ProductProvider extends ContentProvider {
 
 
 
-    @Nullable
+    @Override
+    public int update(@NonNull Uri uri, @Nullable ContentValues contentValues, @Nullable String selection, @Nullable String[] selectionArgs) {
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case PRODUCTS:
+                return updateProduct(uri, contentValues, selection, selectionArgs);
+            case PRODUCT_ID:
+                selection = ProductsContract.ProductEntry._ID + "=?";
+                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
+                return updateProduct(uri, contentValues, selection, selectionArgs);
+            default:
+                throw new IllegalArgumentException("Update is not supported for " + uri);
+        }
+    }
+
+    private int updateProduct(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        if (values.containsKey(ProductsContract.ProductEntry.COLUMN_PRODUCT_NAME)) {
+            String name = values.getAsString(ProductsContract.ProductEntry.COLUMN_PRODUCT_NAME);
+            if (name == null) {
+                throw new IllegalArgumentException("Product requires a name");
+            }
+        }
+
+        if (values.containsKey(ProductsContract.ProductEntry.COLUMN_SUPPLIER_NAME)) {
+            Integer supplierName = values.getAsInteger(ProductsContract.ProductEntry.COLUMN_SUPPLIER_NAME);
+            if (supplierName == null || !ProductsContract.ProductEntry.isValidSupplierCode(supplierName)) {
+                throw new IllegalArgumentException("Product requires valid supplier name");
+            }
+        }
+
+        if (values.containsKey(ProductsContract.ProductEntry.COLUMN_PRODUCT_QUANTITY)) {
+            Integer quantity = values.getAsInteger(ProductsContract.ProductEntry.COLUMN_PRODUCT_QUANTITY);
+            if (quantity != null && quantity < 0) {
+                throw new IllegalArgumentException("Product requires valid quantity");
+            }
+        }
+
+        if (values.containsKey(ProductsContract.ProductEntry.COLUMN_PRODUCT_PRICE)) {
+            Float price = values.getAsFloat(ProductsContract.ProductEntry.COLUMN_PRODUCT_PRICE);
+            if (price != null && price < 0) {
+                throw new IllegalArgumentException("Product requires valid price");
+            }
+        }
+
+        if (values.containsKey(ProductsContract.ProductEntry.COLUMN_SUPPLIER_PHONE_NUMBER)) {
+            String supplierPhoneNumber = values.getAsString(ProductsContract.ProductEntry.COLUMN_SUPPLIER_PHONE_NUMBER);
+            if (!Pattern.matches(PHONE_REGEX, supplierPhoneNumber)) {
+                throw new IllegalArgumentException("Product requires 10 digit supplier phone number");
+            }
+        }
+
+        if (values.size() == 0) {
+            return 0;
+        }
+
+        SQLiteDatabase database = mDbHelper.getWritableDatabase();
+        int rowsUpdated = database.update(ProductsContract.ProductEntry.TABLE_NAME, values, selection, selectionArgs);
+
+        if (rowsUpdated != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
+        return rowsUpdated;
+    }
+
+
+        @Nullable
     @Override
     public String getType(@NonNull Uri uri) {
         return null;
@@ -112,11 +184,6 @@ public class ProductProvider extends ContentProvider {
 
     @Override
     public int delete(@NonNull Uri uri, @Nullable String s, @Nullable String[] strings) {
-        return 0;
-    }
-
-    @Override
-    public int update(@NonNull Uri uri, @Nullable ContentValues contentValues, @Nullable String s, @Nullable String[] strings) {
         return 0;
     }
 }
