@@ -27,16 +27,9 @@ public class ProductsContract {
         public final static String COLUMN_SUPPLIER_NAME = "supplier_name";
         public final static String COLUMN_SUPPLIER_PHONE_NUMBER = "supplier_phone_number";
 
-        public final static int SUPPLIER_CODE_NIVEA = 1;
-        public final static int SUPPLIER_CODE_LOREAL = 2;
-        public final static int SUPPLIER_CODE_REVLON = 3;
-
-        public static boolean isValidSupplierCode(int supplierCode) {
-            if (supplierCode == SUPPLIER_CODE_NIVEA || supplierCode == SUPPLIER_CODE_LOREAL || supplierCode == SUPPLIER_CODE_REVLON) {
-                return true;
-            }
-            return false;
-        }
+        public final static String SUPPLIER_NAME_NIVEA = "Nivea";
+        public final static String SUPPLIER_NAME_LOREAL = "Loreal";
+        public final static String SUPPLIER_NAME_REVLON = "Revlon";
 
 
     }

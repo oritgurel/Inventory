@@ -21,7 +21,7 @@ public class ProductsDbHelper extends SQLiteOpenHelper {
                 + ProductsContract.ProductEntry.COLUMN_PRODUCT_NAME + " TEXT NOT NULL, "
                 + ProductsContract.ProductEntry.COLUMN_PRODUCT_PRICE + " FLOAT, "
                 + ProductsContract.ProductEntry.COLUMN_PRODUCT_QUANTITY + " INTEGER NOT NULL DEFAULT 0, "
-                + ProductsContract.ProductEntry.COLUMN_SUPPLIER_NAME + " INTEGER NOT NULL DEFAULT 0, "
+                + ProductsContract.ProductEntry.COLUMN_SUPPLIER_NAME + " TEXT NOT NULL, "
                 + ProductsContract.ProductEntry.COLUMN_SUPPLIER_PHONE_NUMBER + " TEXT);";
 
         // Execute the SQL statement

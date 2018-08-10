@@ -19,10 +19,12 @@ public class ProductProvider extends ContentProvider {
     private static final int PRODUCTS = 100;
     private static final int PRODUCT_ID = 101;
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+
     static {
         sUriMatcher.addURI(ProductsContract.CONTENT_AUTHORITY, ProductsContract.PATH_PRODUCTS, PRODUCTS);
         sUriMatcher.addURI(ProductsContract.CONTENT_AUTHORITY, ProductsContract.PATH_PRODUCTS + "/#", PRODUCT_ID);
     }
+
     private static final String PHONE_REGEX = "^[0][1-9]\\d{8}$|^[1-9]\\d{8}$";
 
     private ProductsDbHelper mDbHelper;
@@ -47,7 +49,7 @@ public class ProductProvider extends ContentProvider {
                 break;
             case PRODUCT_ID:
                 selection = ProductsContract.ProductEntry._ID + "=?";
-                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
                 cursor = database.query(ProductsContract.ProductEntry.TABLE_NAME, projection, selection, selectionArgs,
                         null, null, sortOrder);
                 break;
@@ -74,11 +76,6 @@ public class ProductProvider extends ContentProvider {
         String name = values.getAsString(ProductsContract.ProductEntry.COLUMN_PRODUCT_NAME);
         if (name == null) {
             throw new IllegalArgumentException("Product requires a name");
-        }
-
-        Integer supplierName = values.getAsInteger(ProductsContract.ProductEntry.COLUMN_SUPPLIER_NAME);
-        if (supplierName == null || !ProductsContract.ProductEntry.isValidSupplierCode(supplierName)) {
-            throw new IllegalArgumentException("Product requires valid supplier name");
         }
 
         Integer quantity = values.getAsInteger(ProductsContract.ProductEntry.COLUMN_PRODUCT_QUANTITY);
@@ -109,7 +106,6 @@ public class ProductProvider extends ContentProvider {
     }
 
 
-
     @Override
     public int update(@NonNull Uri uri, @Nullable ContentValues contentValues, @Nullable String selection, @Nullable String[] selectionArgs) {
         final int match = sUriMatcher.match(uri);
@@ -118,7 +114,7 @@ public class ProductProvider extends ContentProvider {
                 return updateProduct(uri, contentValues, selection, selectionArgs);
             case PRODUCT_ID:
                 selection = ProductsContract.ProductEntry._ID + "=?";
-                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
                 return updateProduct(uri, contentValues, selection, selectionArgs);
             default:
                 throw new IllegalArgumentException("Update is not supported for " + uri);
@@ -130,13 +126,6 @@ public class ProductProvider extends ContentProvider {
             String name = values.getAsString(ProductsContract.ProductEntry.COLUMN_PRODUCT_NAME);
             if (name == null) {
                 throw new IllegalArgumentException("Product requires a name");
-            }
-        }
-
-        if (values.containsKey(ProductsContract.ProductEntry.COLUMN_SUPPLIER_NAME)) {
-            Integer supplierName = values.getAsInteger(ProductsContract.ProductEntry.COLUMN_SUPPLIER_NAME);
-            if (supplierName == null || !ProductsContract.ProductEntry.isValidSupplierCode(supplierName)) {
-                throw new IllegalArgumentException("Product requires valid supplier name");
             }
         }
 
@@ -187,7 +176,7 @@ public class ProductProvider extends ContentProvider {
                 break;
             case PRODUCT_ID:
                 selection = ProductsContract.ProductEntry._ID + "=?";
-                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
                 rowsDeleted = database.delete(ProductsContract.ProductEntry.TABLE_NAME, selection, selectionArgs);
                 break;
             default:
@@ -201,18 +190,18 @@ public class ProductProvider extends ContentProvider {
         return rowsDeleted;
     }
 
-        @Nullable
+    @Nullable
     @Override
     public String getType(@NonNull Uri uri) {
-            final int match = sUriMatcher.match(uri);
-            switch (match) {
-                case PRODUCTS:
-                    return ProductsContract.ProductEntry.CONTENT_LIST_TYPE;
-                case PRODUCT_ID:
-                    return ProductsContract.ProductEntry.CONTENT_ITEM_TYPE;
-                default:
-                    throw new IllegalStateException("Unknown URI " + uri + " with match " + match);
-            }
-
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case PRODUCTS:
+                return ProductsContract.ProductEntry.CONTENT_LIST_TYPE;
+            case PRODUCT_ID:
+                return ProductsContract.ProductEntry.CONTENT_ITEM_TYPE;
+            default:
+                throw new IllegalStateException("Unknown URI " + uri + " with match " + match);
         }
+
+    }
 }
