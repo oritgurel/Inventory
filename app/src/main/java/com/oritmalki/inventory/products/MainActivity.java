@@ -4,13 +4,20 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
 import com.oritmalki.inventory.products.data.ProductsContract;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+
+    private static final int PRODUCT_LOADER_ID = 0;
 
     private TextView mDisplayTv;
 
@@ -18,6 +25,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        getSupportLoaderManager().initLoader(PRODUCT_LOADER_ID, null, this);
+
         mDisplayTv = findViewById(R.id.display_tv);
         insertProduct();
         showDbInfo();
@@ -92,6 +102,34 @@ public class MainActivity extends AppCompatActivity {
         Uri newUri = getContentResolver().insert(ProductsContract.ProductEntry.CONTENT_URI, values);
     }
 
+    @NonNull
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, @Nullable Bundle bundle) {
+        String[] projection = {
+                ProductsContract.ProductEntry.COLUMN_PRODUCT_NAME,
+                ProductsContract.ProductEntry.COLUMN_PRODUCT_PRICE,
+                ProductsContract.ProductEntry.COLUMN_PRODUCT_QUANTITY,
+                ProductsContract.ProductEntry.COLUMN_SUPPLIER_NAME,
+                ProductsContract.ProductEntry.COLUMN_SUPPLIER_PHONE_NUMBER
+        };
+
+        return new CursorLoader(this,
+                ProductsContract.ProductEntry.CONTENT_URI,
+                projection,
+                null,
+                null,
+                null);
+    }
+
+    @Override
+    public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
+
+    }
+
+    @Override
+    public void onLoaderReset(@NonNull Loader<Cursor> loader) {
+
+    }
 }
 
 
