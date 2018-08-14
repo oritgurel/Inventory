@@ -16,7 +16,7 @@
     </style>
 
     <style name="itemTitle" parent="ProductName">
-        <item name="textSize">12sp</item>
+        <item name="android:textSize">12sp</item>
     </style>
 
 </resources>
