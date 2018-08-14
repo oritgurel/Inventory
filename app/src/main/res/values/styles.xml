@@ -8,4 +8,15 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <!--ProductListItem Styles-->
+
+    <style name="ProductName" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">@dimen/medium_text_size</item>
+    </style>
+
+    <style name="itemTitle" parent="ProductName">
+        <item name="textSize">12sp</item>
+    </style>
+
 </resources>

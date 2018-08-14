@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <group>
-        <item android:title="@string/mainactivity_menu_insert_product"
-         />
+        <item
+            android:id="@+id/menu_main_insert_product"
+            android:title="@string/mainactivity_menu_insert_product"
+            app:showAsAction="never" />
+
+        <item
+            android:id="@+id/menu_main_delete_all_enteries"
+            android:title="@string/menu_mainactivity_delete_all"
+            app:showAsAction="never" />
     </group>
 
 </menu>

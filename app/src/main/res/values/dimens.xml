@@ -2,4 +2,9 @@
 <resources>
     <dimen name="default_page_margin">16dp</dimen>
     <dimen name="medium_text_size">16sp</dimen>
+    <dimen name="product_list_item_hight">120dp</dimen>
+    <dimen name="product_list_item_supplier_margin_top">5dp</dimen>
+    <dimen name="product_list_quantity_margin_end">40dp</dimen>
+    <dimen name="product_list_item_divider">2dp</dimen>
+    <dimen name="product_list_item_divider_margin_vertical">10dp</dimen>
 </resources>
