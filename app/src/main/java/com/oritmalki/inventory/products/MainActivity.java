@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         ListView productListView = findViewById(R.id.activity_main_listview);
         View emptyView = findViewById(R.id.empty_view);
         productListView.setEmptyView(emptyView);
-        mCursorAdapter = new ProductsCursorAdapter(this, null, false);
+        mCursorAdapter = new ProductsCursorAdapter(this, null, true);
         productListView.setAdapter(mCursorAdapter);
 
         //TODO set OnItemClickListener
@@ -48,63 +48,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-//        showDbInfo();
-    }
 
-    private void showDbInfo() {
-        String[] projection = {
-                ProductsContract.ProductEntry._ID,
-                ProductsContract.ProductEntry.COLUMN_PRODUCT_NAME,
-                ProductsContract.ProductEntry.COLUMN_PRODUCT_PRICE,
-                ProductsContract.ProductEntry.COLUMN_PRODUCT_QUANTITY,
-                ProductsContract.ProductEntry.COLUMN_SUPPLIER_NAME,
-                ProductsContract.ProductEntry.COLUMN_SUPPLIER_PHONE_NUMBER};
-
-        Cursor cursor = getContentResolver().query(
-                ProductsContract.ProductEntry.CONTENT_URI, projection, null, null, null);
-
-
-        try {
-
-            mDisplayTv.setText("The products table contains " + cursor.getCount() + " products.\n\n");
-            mDisplayTv.append(ProductsContract.ProductEntry._ID + " - " +
-                    ProductsContract.ProductEntry.COLUMN_PRODUCT_NAME + " - " +
-                    ProductsContract.ProductEntry.COLUMN_PRODUCT_PRICE + " - " +
-                    ProductsContract.ProductEntry.COLUMN_PRODUCT_QUANTITY + " - " +
-                    ProductsContract.ProductEntry.COLUMN_SUPPLIER_NAME + " - " +
-                    ProductsContract.ProductEntry.COLUMN_SUPPLIER_PHONE_NUMBER + "\n");
-
-            // Figure out the index of each column
-            int idColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry._ID);
-            int nameColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_PRODUCT_NAME);
-            int priceColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_PRODUCT_PRICE);
-            int quantityColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_PRODUCT_QUANTITY);
-            int supplierColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_SUPPLIER_NAME);
-            int supplierPhoneColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_SUPPLIER_PHONE_NUMBER);
-
-            while (cursor.moveToNext()) {
-                int currentID = cursor.getInt(idColumnIndex);
-                String currentName = cursor.getString(nameColumnIndex);
-                Float currentPrice = cursor.getFloat(priceColumnIndex);
-                int currentQuantity = cursor.getInt(quantityColumnIndex);
-                String currentSupplier = cursor.getString(supplierColumnIndex);
-                String currentSupplierPhone = cursor.getString(supplierPhoneColumnIndex);
-
-                mDisplayTv.append(("\n" + currentID + " - " +
-                        currentName + " - " +
-                        currentPrice + " - " +
-                        currentQuantity + " - " +
-                        currentSupplier + " - " +
-                        currentSupplierPhone));
-            }
-        } finally {
-
-            cursor.close();
-        }
-    }
 
     private void insertProduct() {
         ContentValues values = new ContentValues();
@@ -115,10 +59,14 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         values.put(ProductsContract.ProductEntry.COLUMN_SUPPLIER_PHONE_NUMBER, "0525890478");
 
         Uri newUri = getContentResolver().insert(ProductsContract.ProductEntry.CONTENT_URI, values);
+        getSupportLoaderManager().restartLoader(PRODUCT_LOADER_ID, null, this);
+
+
     }
 
     private void deleteAllProducts() {
         int rowsDeleted = getContentResolver().delete(ProductsContract.ProductEntry.CONTENT_URI, null, null);
+        getSupportLoaderManager().restartLoader(PRODUCT_LOADER_ID, null, this);
         Log.v("MainActivity", rowsDeleted + " rows deleted from product database");
     }
 
@@ -168,11 +116,64 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 return true;
             case R.id.menu_main_delete_all_enteries:
                 deleteAllProducts();
+                mCursorAdapter.notifyDataSetChanged();
                 return true;
 
         }
         return super.onOptionsItemSelected(item);
     }
+
+    //    private void showDbInfo() {
+//        String[] projection = {
+//                ProductsContract.ProductEntry._ID,
+//                ProductsContract.ProductEntry.COLUMN_PRODUCT_NAME,
+//                ProductsContract.ProductEntry.COLUMN_PRODUCT_PRICE,
+//                ProductsContract.ProductEntry.COLUMN_PRODUCT_QUANTITY,
+//                ProductsContract.ProductEntry.COLUMN_SUPPLIER_NAME,
+//                ProductsContract.ProductEntry.COLUMN_SUPPLIER_PHONE_NUMBER};
+//
+//        Cursor cursor = getContentResolver().query(
+//                ProductsContract.ProductEntry.CONTENT_URI, projection, null, null, null);
+//
+//
+//        try {
+//
+//            mDisplayTv.setText("The products table contains " + cursor.getCount() + " products.\n\n");
+//            mDisplayTv.append(ProductsContract.ProductEntry._ID + " - " +
+//                    ProductsContract.ProductEntry.COLUMN_PRODUCT_NAME + " - " +
+//                    ProductsContract.ProductEntry.COLUMN_PRODUCT_PRICE + " - " +
+//                    ProductsContract.ProductEntry.COLUMN_PRODUCT_QUANTITY + " - " +
+//                    ProductsContract.ProductEntry.COLUMN_SUPPLIER_NAME + " - " +
+//                    ProductsContract.ProductEntry.COLUMN_SUPPLIER_PHONE_NUMBER + "\n");
+//
+//            // Figure out the index of each column
+//            int idColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry._ID);
+//            int nameColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_PRODUCT_NAME);
+//            int priceColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_PRODUCT_PRICE);
+//            int quantityColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_PRODUCT_QUANTITY);
+//            int supplierColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_SUPPLIER_NAME);
+//            int supplierPhoneColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_SUPPLIER_PHONE_NUMBER);
+//
+//            while (cursor.moveToNext()) {
+//                int currentID = cursor.getInt(idColumnIndex);
+//                String currentName = cursor.getString(nameColumnIndex);
+//                Float currentPrice = cursor.getFloat(priceColumnIndex);
+//                int currentQuantity = cursor.getInt(quantityColumnIndex);
+//                String currentSupplier = cursor.getString(supplierColumnIndex);
+//                String currentSupplierPhone = cursor.getString(supplierPhoneColumnIndex);
+//
+//                mDisplayTv.append(("\n" + currentID + " - " +
+//                        currentName + " - " +
+//                        currentPrice + " - " +
+//                        currentQuantity + " - " +
+//                        currentSupplier + " - " +
+//                        currentSupplierPhone));
+//            }
+//        } finally {
+//
+//            cursor.close();
+//        }
+//    }
 }
 
 
