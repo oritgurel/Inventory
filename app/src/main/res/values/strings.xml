@@ -2,4 +2,6 @@
     <string name="app_name">Inventory</string>
     <string name="mainactivity_menu_insert_product">Insert Product</string>
     <string name="menu_mainactivity_delete_all">Delete All</string>
+    <string name="the_stock_is_empty">The stock is empty.</string>
+    <string name="please_insert_products">Please insert products.</string>
 </resources>

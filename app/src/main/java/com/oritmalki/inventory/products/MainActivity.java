@@ -13,6 +13,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.oritmalki.inventory.products.data.ProductsContract;
@@ -24,22 +26,32 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private TextView mDisplayTv;
 
+    ProductsCursorAdapter mCursorAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //TODO init fab
+
+        ListView productListView = findViewById(R.id.activity_main_listview);
+        View emptyView = findViewById(R.id.empty_view);
+        productListView.setEmptyView(emptyView);
+        mCursorAdapter = new ProductsCursorAdapter(this, null, false);
+        productListView.setAdapter(mCursorAdapter);
+
+        //TODO set OnItemClickListener
+
+
         getSupportLoaderManager().initLoader(PRODUCT_LOADER_ID, null, this);
 
-        mDisplayTv = findViewById(R.id.display_tv);
-        insertProduct();
-        showDbInfo();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        showDbInfo();
+//        showDbInfo();
     }
 
     private void showDbInfo() {
@@ -105,10 +117,16 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         Uri newUri = getContentResolver().insert(ProductsContract.ProductEntry.CONTENT_URI, values);
     }
 
+    private void deleteAllProducts() {
+        int rowsDeleted = getContentResolver().delete(ProductsContract.ProductEntry.CONTENT_URI, null, null);
+        Log.v("MainActivity", rowsDeleted + " rows deleted from product database");
+    }
+
     @NonNull
     @Override
     public Loader<Cursor> onCreateLoader(int i, @Nullable Bundle bundle) {
         String[] projection = {
+                ProductsContract.ProductEntry._ID,
                 ProductsContract.ProductEntry.COLUMN_PRODUCT_NAME,
                 ProductsContract.ProductEntry.COLUMN_PRODUCT_PRICE,
                 ProductsContract.ProductEntry.COLUMN_PRODUCT_QUANTITY,
@@ -126,17 +144,12 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
-
+            mCursorAdapter.swapCursor(cursor);
     }
 
     @Override
     public void onLoaderReset(@NonNull Loader<Cursor> loader) {
-
-    }
-
-    private void deleteAllProducts() {
-        int rowsDeleted = getContentResolver().delete(ProductsContract.ProductEntry.CONTENT_URI, null, null);
-        Log.v("MainActivity", rowsDeleted + " rows deleted from product database");
+            mCursorAdapter.swapCursor(null);
     }
 
 
@@ -154,6 +167,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 insertProduct();
                 return true;
             case R.id.menu_main_delete_all_enteries:
+                deleteAllProducts();
+                return true;
 
         }
         return super.onOptionsItemSelected(item);
