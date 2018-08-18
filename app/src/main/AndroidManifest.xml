@@ -16,10 +16,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <provider
             android:name=".data.ProductProvider"
             android:authorities="com.oritmalki.inventory.products"
             android:exported="false" />
+
+        <activity android:name=".EditProductActivity"></activity>
     </application>
 
 </manifest>

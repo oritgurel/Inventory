@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -40,6 +41,12 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         productListView.setEmptyView(emptyView);
         mCursorAdapter = new ProductsCursorAdapter(this, null, true);
         productListView.setAdapter(mCursorAdapter);
+        productListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+            }
+        });
 
         //TODO set OnItemClickListener
 

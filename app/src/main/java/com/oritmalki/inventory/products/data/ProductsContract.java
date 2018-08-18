@@ -4,6 +4,8 @@ import android.content.ContentResolver;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
+import com.oritmalki.inventory.products.R;
+
 public class ProductsContract {
 
     public ProductsContract() {
@@ -29,7 +31,7 @@ public class ProductsContract {
 
         public final static String SUPPLIER_NAME_NIVEA = "Nivea";
         public final static String SUPPLIER_NAME_LOREAL = "Loreal";
-        public final static String SUPPLIER_NAME_REVLON = "Revlon";
+        public final static String SUPPLIER_NAME_REVLON = "revlon";
 
 
     }

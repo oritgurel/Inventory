@@ -1,5 +1,6 @@
 package com.oritmalki.inventory.products;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.view.LayoutInflater;
@@ -29,17 +30,19 @@ public class ProductsCursorAdapter extends CursorAdapter {
 
         TextView nameTv = view.findViewById(R.id.product_list_item_name_tv);
         TextView priceTv = view.findViewById(R.id.product_list_item_price_tv);
-        TextView quantityTv = view.findViewById(R.id.product_list_item_quantity_tv);
+        final TextView quantityTv = view.findViewById(R.id.product_list_item_quantity_tv);
         ImageButton saleBtn = view.findViewById(R.id.product_list_sale_btn);
 
 
         int nameColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_PRODUCT_NAME);
         int priceColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_PRODUCT_PRICE);
         final int quantityColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_PRODUCT_QUANTITY);
+        final int idColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry._ID);
 
         String name = cursor.getString(nameColumnIndex);
         Float price = cursor.getFloat(priceColumnIndex);
         final int quantity = cursor.getInt(quantityColumnIndex);
+        final int itemId = cursor.getInt(idColumnIndex);
 
         nameTv.setText(name);
         priceTv.setText(String.valueOf(price));
@@ -47,8 +50,15 @@ public class ProductsCursorAdapter extends CursorAdapter {
         saleBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                long id = ((Long) view.getTag());
-//                context.getContentResolver().delete(ProductsContract.ProductEntry.CONTENT_URI, quantityColumnIndex,)
+                //TODO not working
+                int position = cursor.getPosition();
+                cursor.moveToPosition(position);
+                ContentValues decrementQuantity = new ContentValues();
+                decrementQuantity.put(ProductsContract.ProductEntry.COLUMN_PRODUCT_QUANTITY, quantity - 1);
+                String selection = ProductsContract.ProductEntry._ID + "=?";
+                String[] itemIdArgs = {String.valueOf(itemId)};
+                context.getContentResolver().update(ProductsContract.ProductEntry.CONTENT_URI, decrementQuantity, selection, itemIdArgs);
+                notifyDataSetChanged();
             }
         });
 
