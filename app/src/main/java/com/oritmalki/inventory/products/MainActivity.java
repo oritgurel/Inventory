@@ -1,6 +1,8 @@
 package com.oritmalki.inventory.products;
 
+import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -24,9 +26,6 @@ import com.oritmalki.inventory.products.data.ProductsContract;
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int PRODUCT_LOADER_ID = 0;
-
-    private TextView mDisplayTv;
-
     ProductsCursorAdapter mCursorAdapter;
 
     @Override
@@ -44,12 +43,12 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         productListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
+                Intent intent = new Intent(MainActivity.this, EditProductActivity.class);
+                Uri currentProductUri = ContentUris.withAppendedId(ProductsContract.ProductEntry.CONTENT_URI, id);
+                intent.setData(currentProductUri);
+                startActivity(intent);
             }
         });
-
-        //TODO set OnItemClickListener
-
 
         getSupportLoaderManager().initLoader(PRODUCT_LOADER_ID, null, this);
 

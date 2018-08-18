@@ -65,6 +65,8 @@ public class EditProductActivity extends AppCompatActivity implements LoaderMana
             getSupportLoaderManager().initLoader(EXISTING_PRODUCT_LOADER, null, this);
         }
 
+        initViews();
+
     }
 
     private void initViews() {
@@ -206,12 +208,48 @@ public class EditProductActivity extends AppCompatActivity implements LoaderMana
             if (cursor.moveToFirst()) {
                 int nameColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_PRODUCT_NAME);
                 int quantityColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_PRODUCT_QUANTITY);
+                int priceColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_PRODUCT_PRICE);
+                int idColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry._ID);
+                int supplierNameColIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_SUPPLIER_NAME);
+                int supplierPhoneColIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_SUPPLIER_PHONE_NUMBER);
+
+
+                String name = cursor.getString(nameColumnIndex);
+                Float price = cursor.getFloat(priceColumnIndex);
+                int quantity = cursor.getInt(quantityColumnIndex);
+                int itemId = cursor.getInt(idColumnIndex);
+                String supplierName = cursor.getString(supplierNameColIndex);
+                String supplierPhone = cursor.getString(supplierPhoneColIndex);
+
+                mNameEt.setText(name);
+                mPriceEt.setText(String.valueOf(price));
+                mQuantityEt.setText(String.valueOf(quantity));
+                mSupplierPhoneEt.setText(supplierPhone);
+                switch (supplierName) {
+                    case ProductsContract.ProductEntry.SUPPLIER_NAME_LOREAL:
+                        mSupplierNameSpinner.setSelection(0);
+                        break;
+                    case ProductsContract.ProductEntry.SUPPLIER_NAME_REVLON:
+                        mSupplierNameSpinner.setSelection(1);
+                        break;
+                    case ProductsContract.ProductEntry.SUPPLIER_NAME_NIVEA:
+                        mSupplierNameSpinner.setSelection(2);
+                        break;
+                    default:
+                        mSupplierNameSpinner.setSelection(0);
+                        break;
+                }
+
             }
     }
 
     @Override
     public void onLoaderReset(@NonNull Loader<Cursor> loader) {
-
+        mNameEt.setText("");
+        mPriceEt.setText("");
+        mQuantityEt.setText("");
+        mSupplierPhoneEt.setText("");
+        mSupplierNameSpinner.setSelection(0);
     }
 
     @Override
