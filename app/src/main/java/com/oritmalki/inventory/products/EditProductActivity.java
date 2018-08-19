@@ -1,12 +1,16 @@
 package com.oritmalki.inventory.products;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -20,6 +24,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -37,6 +42,7 @@ public class EditProductActivity extends AppCompatActivity implements LoaderMana
     private EditText mPriceEt;
     private EditText mSupplierPhoneEt;
     private Spinner mSupplierNameSpinner;
+    private Button mOrderFromSupplerBtn;
 
     private String mSupplierName = "";
 
@@ -75,6 +81,25 @@ public class EditProductActivity extends AppCompatActivity implements LoaderMana
         mPriceEt = findViewById(R.id.product_price_et);
         mSupplierPhoneEt = findViewById(R.id.supplier_phone_number);
         mSupplierNameSpinner = findViewById(R.id.supplier_name_spinner);
+        mOrderFromSupplerBtn = findViewById(R.id.call_supplier_btn);
+        mOrderFromSupplerBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + mSupplierPhoneEt.getText().toString().trim()));
+                if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                    // TODO: Consider calling
+                    //    ActivityCompat#requestPermissions
+                    // here to request the missing permissions, and then overriding
+                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                    //                                          int[] grantResults)
+                    // to handle the case where the user grants the permission. See the documentation
+                    // for ActivityCompat#requestPermissions for more details.
+                    return;
+                }
+                startActivity(intent);
+
+            }
+        });
 
         mNameEt.setOnTouchListener(mOnTouchListener);
         mQuantityEt.setOnTouchListener(mOnTouchListener);
@@ -111,8 +136,8 @@ public class EditProductActivity extends AppCompatActivity implements LoaderMana
         String price = mPriceEt.getText().toString().trim();
         String supplierPhone = mSupplierPhoneEt.getText().toString().trim();
 
-        if (mCurrentProductUri == null && TextUtils.isEmpty(name) && TextUtils.isEmpty(quantity) && TextUtils.isEmpty(price)
-                && mSupplierName == "") {
+        if (mCurrentProductUri == null && TextUtils.isEmpty(name) || TextUtils.isEmpty(quantity) || TextUtils.isEmpty(price)
+                || mSupplierName == "") {
             return;
         }
 
@@ -164,7 +189,7 @@ public class EditProductActivity extends AppCompatActivity implements LoaderMana
     protected boolean onPrepareOptionsPanel(View view, Menu menu) {
         super.onPrepareOptionsPanel(view, menu);
         if (mCurrentProductUri == null) {
-            MenuItem menuItem = menu.findItem(R.id.menu_main_delete_all_enteries);
+            MenuItem menuItem = menu.findItem(R.id.action_delete);
             menuItem.setVisible(false);
         }
         return true;

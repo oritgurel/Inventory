@@ -6,18 +6,20 @@ import android.database.Cursor;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.ImageButton;
 import android.widget.TextView;
-
-import com.oritmalki.inventory.products.data.ProductProvider;
 import com.oritmalki.inventory.products.data.ProductsContract;
 
 public class ProductsCursorAdapter extends CursorAdapter {
+    private ISaleButton mSaleBtnCallback;
 
     public ProductsCursorAdapter(Context context, Cursor c, boolean autoRequery) {
         super(context, c, autoRequery);
+    }
+
+    public void setmSaleBtnCallback(ISaleButton mSaleBtnCallback) {
+        this.mSaleBtnCallback = mSaleBtnCallback;
     }
 
     @Override
@@ -51,16 +53,24 @@ public class ProductsCursorAdapter extends CursorAdapter {
             @Override
             public void onClick(View v) {
                 //TODO not working
-                int position = cursor.getPosition();
-                cursor.moveToPosition(position);
-                ContentValues decrementQuantity = new ContentValues();
-                decrementQuantity.put(ProductsContract.ProductEntry.COLUMN_PRODUCT_QUANTITY, quantity - 1);
-                String selection = ProductsContract.ProductEntry._ID + "=?";
-                String[] itemIdArgs = {String.valueOf(itemId)};
-                context.getContentResolver().update(ProductsContract.ProductEntry.CONTENT_URI, decrementQuantity, selection, itemIdArgs);
-                notifyDataSetChanged();
+                decreaseQuantity(cursor, quantity, context, itemId);
+                mSaleBtnCallback.onSaleButtonClicked();
             }
         });
 
     }
+
+    private void decreaseQuantity(Cursor cursor, int quantity, Context context, int itemId) {
+        int position = cursor.getPosition();
+        cursor.moveToPosition(position);
+        ContentValues decrementQuantity = new ContentValues();
+        if (quantity > 0) {
+            decrementQuantity.put(ProductsContract.ProductEntry.COLUMN_PRODUCT_QUANTITY, quantity - 1);
+        }
+        String selection = ProductsContract.ProductEntry._ID + "=?";
+        String[] itemIdArgs = {String.valueOf(itemId)};
+        context.getContentResolver().update(ProductsContract.ProductEntry.CONTENT_URI, decrementQuantity, selection, itemIdArgs);
+        changeCursor(cursor);
+    }
+
 }

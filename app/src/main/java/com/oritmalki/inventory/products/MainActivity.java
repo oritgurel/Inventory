@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -20,10 +21,11 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.oritmalki.inventory.products.data.ProductProvider;
 import com.oritmalki.inventory.products.data.ProductsContract;
 
 
-public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>, ISaleButton {
 
     private static final int PRODUCT_LOADER_ID = 0;
     ProductsCursorAdapter mCursorAdapter;
@@ -33,12 +35,12 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //TODO init fab
-
+        FloatingActionButton fab = findViewById(R.id.fab_add_product);
         ListView productListView = findViewById(R.id.activity_main_listview);
         View emptyView = findViewById(R.id.empty_view);
         productListView.setEmptyView(emptyView);
         mCursorAdapter = new ProductsCursorAdapter(this, null, true);
+        mCursorAdapter.setmSaleBtnCallback(this);
         productListView.setAdapter(mCursorAdapter);
         productListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -50,11 +52,33 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             }
         });
 
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, EditProductActivity.class);
+                startActivity(intent);
+            }
+        });
+
         getSupportLoaderManager().initLoader(PRODUCT_LOADER_ID, null, this);
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getSupportLoaderManager().restartLoader(PRODUCT_LOADER_ID, null, this);
 
+
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        getSupportLoaderManager().restartLoader(PRODUCT_LOADER_ID, null, this);
+        mCursorAdapter.notifyDataSetChanged();
+
+    }
 
     private void insertProduct() {
         ContentValues values = new ContentValues();
@@ -129,57 +153,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         return super.onOptionsItemSelected(item);
     }
 
-    //    private void showDbInfo() {
-//        String[] projection = {
-//                ProductsContract.ProductEntry._ID,
-//                ProductsContract.ProductEntry.COLUMN_PRODUCT_NAME,
-//                ProductsContract.ProductEntry.COLUMN_PRODUCT_PRICE,
-//                ProductsContract.ProductEntry.COLUMN_PRODUCT_QUANTITY,
-//                ProductsContract.ProductEntry.COLUMN_SUPPLIER_NAME,
-//                ProductsContract.ProductEntry.COLUMN_SUPPLIER_PHONE_NUMBER};
-//
-//        Cursor cursor = getContentResolver().query(
-//                ProductsContract.ProductEntry.CONTENT_URI, projection, null, null, null);
-//
-//
-//        try {
-//
-//            mDisplayTv.setText("The products table contains " + cursor.getCount() + " products.\n\n");
-//            mDisplayTv.append(ProductsContract.ProductEntry._ID + " - " +
-//                    ProductsContract.ProductEntry.COLUMN_PRODUCT_NAME + " - " +
-//                    ProductsContract.ProductEntry.COLUMN_PRODUCT_PRICE + " - " +
-//                    ProductsContract.ProductEntry.COLUMN_PRODUCT_QUANTITY + " - " +
-//                    ProductsContract.ProductEntry.COLUMN_SUPPLIER_NAME + " - " +
-//                    ProductsContract.ProductEntry.COLUMN_SUPPLIER_PHONE_NUMBER + "\n");
-//
-//            // Figure out the index of each column
-//            int idColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry._ID);
-//            int nameColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_PRODUCT_NAME);
-//            int priceColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_PRODUCT_PRICE);
-//            int quantityColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_PRODUCT_QUANTITY);
-//            int supplierColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_SUPPLIER_NAME);
-//            int supplierPhoneColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_SUPPLIER_PHONE_NUMBER);
-//
-//            while (cursor.moveToNext()) {
-//                int currentID = cursor.getInt(idColumnIndex);
-//                String currentName = cursor.getString(nameColumnIndex);
-//                Float currentPrice = cursor.getFloat(priceColumnIndex);
-//                int currentQuantity = cursor.getInt(quantityColumnIndex);
-//                String currentSupplier = cursor.getString(supplierColumnIndex);
-//                String currentSupplierPhone = cursor.getString(supplierPhoneColumnIndex);
-//
-//                mDisplayTv.append(("\n" + currentID + " - " +
-//                        currentName + " - " +
-//                        currentPrice + " - " +
-//                        currentQuantity + " - " +
-//                        currentSupplier + " - " +
-//                        currentSupplierPhone));
-//            }
-//        } finally {
-//
-//            cursor.close();
-//        }
-//    }
+    @Override
+    public void onSaleButtonClicked() {
+        getSupportLoaderManager().restartLoader(PRODUCT_LOADER_ID, null, this);
+        mCursorAdapter.notifyDataSetChanged();
+    }
 }
 
 
