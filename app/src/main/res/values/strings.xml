@@ -24,4 +24,6 @@
     <string name="dialog_message_unsaved_changes">There are unsaved changes to product.   Discard changes?</string>
     <string name="dialog_discard_btn">Discard</string>
     <string name="dialog_btn_keep_editing">Keep Editing</string>
+    <string name="edit_error_fill_all_fields">Please fill all fields</string>
+    <string name="edit_error_phone_number">Product requires 10 digit supplier phone number</string>
 </resources>

@@ -29,6 +29,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.oritmalki.inventory.products.data.ProductProvider;
 import com.oritmalki.inventory.products.data.ProductsContract;
 
 public class EditProductActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -130,15 +131,16 @@ public class EditProductActivity extends AppCompatActivity implements LoaderMana
         });
     }
 
-    private void saveProduct() {
+    private boolean validateAndSaveProduct() {
         String name = mNameEt.getText().toString().trim();
         String quantity = mQuantityEt.getText().toString().trim();
         String price = mPriceEt.getText().toString().trim();
         String supplierPhone = mSupplierPhoneEt.getText().toString().trim();
 
         if (mCurrentProductUri == null && TextUtils.isEmpty(name) || TextUtils.isEmpty(quantity) || TextUtils.isEmpty(price)
-                || mSupplierName == "") {
-            return;
+                || mSupplierName == "" || TextUtils.isEmpty(supplierPhone)) {
+            Toast.makeText(this, R.string.edit_error_fill_all_fields, Toast.LENGTH_LONG).show();
+            return false;
         }
 
         ContentValues values = new ContentValues();
@@ -155,7 +157,12 @@ public class EditProductActivity extends AppCompatActivity implements LoaderMana
         }
 
         values.put(ProductsContract.ProductEntry.COLUMN_SUPPLIER_NAME, mSupplierName);
-        values.put(ProductsContract.ProductEntry.COLUMN_SUPPLIER_PHONE_NUMBER, supplierPhone);
+        if (supplierPhone.matches(ProductProvider.PHONE_REGEX)) {
+            values.put(ProductsContract.ProductEntry.COLUMN_SUPPLIER_PHONE_NUMBER, supplierPhone);
+        } else {
+            Toast.makeText(this, getString(R.string.edit_error_phone_number), Toast.LENGTH_LONG).show();
+            return false;
+        }
 
         if (mCurrentProductUri == null) {
             Uri newUri = getContentResolver().insert(ProductsContract.ProductEntry.CONTENT_URI, values);
@@ -167,7 +174,7 @@ public class EditProductActivity extends AppCompatActivity implements LoaderMana
             }
         } else {
             // existing product, edit mode
-            int rowsChanged = getContentResolver().update(ProductsContract.ProductEntry.CONTENT_URI, values, null, null);
+            int rowsChanged = getContentResolver().update(mCurrentProductUri, values, null, null);
 
             if (rowsChanged == 0) {
                 Toast.makeText(this, getString(R.string.toast_error_update_product), Toast.LENGTH_LONG).show();
@@ -175,7 +182,7 @@ public class EditProductActivity extends AppCompatActivity implements LoaderMana
                 Toast.makeText(this, getString(R.string.toast_update_success), Toast.LENGTH_LONG).show();
             }
         }
-
+        return true;
     }
 
     @Override
@@ -199,8 +206,9 @@ public class EditProductActivity extends AppCompatActivity implements LoaderMana
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_save:
-                saveProduct();
-                finish();
+                if (validateAndSaveProduct()) {
+                    finish();
+                }
                 break;
             case R.id.action_delete:
                 break;

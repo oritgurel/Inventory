@@ -12,6 +12,8 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.oritmalki.inventory.products.R;
+
 import java.util.regex.Pattern;
 
 public class ProductProvider extends ContentProvider {
@@ -26,7 +28,7 @@ public class ProductProvider extends ContentProvider {
         sUriMatcher.addURI(ProductsContract.CONTENT_AUTHORITY, ProductsContract.PATH_PRODUCTS + "/#", PRODUCT_ID);
     }
 
-    private static final String PHONE_REGEX = "^[0][1-9]\\d{8}$|^[1-9]\\d{8}$";
+    public static final String PHONE_REGEX = "^[0][1-9]\\d{8}$|^[1-9]\\d{8}$";
 
     private ProductsDbHelper mDbHelper;
 
