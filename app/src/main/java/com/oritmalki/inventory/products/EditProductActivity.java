@@ -151,10 +151,14 @@ public class EditProductActivity extends AppCompatActivity implements LoaderMana
             int quantityInt = Integer.parseInt(quantity);
             if (!TextUtils.isEmpty(mChangeQuantityByEt.getText().toString().trim())) {
                 int changeBy = Integer.parseInt(mChangeQuantityByEt.getText().toString().trim());
-                mQuantityEt.setText(String.valueOf(quantityInt - changeBy));
-                return;
+                if ((quantityInt - 1) >= 0) {
+                    mQuantityEt.setText(String.valueOf(quantityInt - changeBy));
+                    return;
+                }
             }
-            mQuantityEt.setText(String.valueOf(quantityInt - 1));
+            if ((quantityInt - 1) >= 0) {
+                mQuantityEt.setText(String.valueOf(quantityInt - 1));
+            }
         }
     }
 
