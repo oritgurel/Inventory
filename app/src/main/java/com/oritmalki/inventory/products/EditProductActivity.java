@@ -92,7 +92,6 @@ public class EditProductActivity extends AppCompatActivity implements LoaderMana
         mIncreaseQuantity = findViewById(R.id.edit_increase_quantity_btn);
         mDecreaseQuantity = findViewById(R.id.edit_decrease_quantity_btn);
         mOrderFromSupplerBtn = findViewById(R.id.call_supplier_btn);
-
         mNameEt.setOnTouchListener(mOnTouchListener);
         mQuantityEt.setOnTouchListener(mOnTouchListener);
         mPriceEt.setOnTouchListener(mOnTouchListener);
@@ -113,7 +112,6 @@ public class EditProductActivity extends AppCompatActivity implements LoaderMana
                     case R.id.edit_decrease_quantity_btn:
                         decreateQuantity();
                         break;
-
                 }
             }
         };
@@ -261,6 +259,7 @@ public class EditProductActivity extends AppCompatActivity implements LoaderMana
                 }
                 break;
             case R.id.action_delete:
+                showDeleteConfirmationDialog();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -367,5 +366,37 @@ public class EditProductActivity extends AppCompatActivity implements LoaderMana
         });
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
+    }
+
+    private void showDeleteConfirmationDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.alert_dialog_delete_product_message);
+        builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                deleteProduct();
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    private void deleteProduct() {
+        if (mCurrentProductUri != null) {
+            int rowsDeleted = getContentResolver().delete(mCurrentProductUri, null, null);
+            if (rowsDeleted == 0) {
+                Toast.makeText(this, R.string.delete_product_failed, Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, R.string.product_deleted_message, Toast.LENGTH_LONG).show();
+            }
+            finish();
+        }
     }
 }
