@@ -26,4 +26,6 @@
     <string name="dialog_btn_keep_editing">Keep Editing</string>
     <string name="edit_error_fill_all_fields">Please fill all fields</string>
     <string name="edit_error_phone_number">Product requires 10 digit supplier phone number</string>
+    <string name="et_change_by">Change By</string>
+    <string name="edit_dial_error_valid_phone">Must enter valid phone number</string>
 </resources>

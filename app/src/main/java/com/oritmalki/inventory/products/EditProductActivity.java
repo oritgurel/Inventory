@@ -32,6 +32,8 @@ import android.widget.Toast;
 import com.oritmalki.inventory.products.data.ProductProvider;
 import com.oritmalki.inventory.products.data.ProductsContract;
 
+import java.util.regex.Pattern;
+
 public class EditProductActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int EXISTING_PRODUCT_LOADER = 0;
@@ -42,8 +44,12 @@ public class EditProductActivity extends AppCompatActivity implements LoaderMana
     private EditText mQuantityEt;
     private EditText mPriceEt;
     private EditText mSupplierPhoneEt;
+    private EditText mChangeQuantityByEt;
     private Spinner mSupplierNameSpinner;
     private Button mOrderFromSupplerBtn;
+    private Button mIncreaseQuantity;
+    private Button mDecreaseQuantity;
+    private View.OnClickListener mOnClickListener;
 
     private String mSupplierName = "";
 
@@ -80,27 +86,12 @@ public class EditProductActivity extends AppCompatActivity implements LoaderMana
         mNameEt = findViewById(R.id.product_name_et);
         mQuantityEt = findViewById(R.id.product_quantity_et);
         mPriceEt = findViewById(R.id.product_price_et);
+        mChangeQuantityByEt = findViewById(R.id.quantity_by_et);
         mSupplierPhoneEt = findViewById(R.id.supplier_phone_number);
         mSupplierNameSpinner = findViewById(R.id.supplier_name_spinner);
+        mIncreaseQuantity = findViewById(R.id.edit_increase_quantity_btn);
+        mDecreaseQuantity = findViewById(R.id.edit_decrease_quantity_btn);
         mOrderFromSupplerBtn = findViewById(R.id.call_supplier_btn);
-        mOrderFromSupplerBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + mSupplierPhoneEt.getText().toString().trim()));
-                if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
-                    return;
-                }
-                startActivity(intent);
-
-            }
-        });
 
         mNameEt.setOnTouchListener(mOnTouchListener);
         mQuantityEt.setOnTouchListener(mOnTouchListener);
@@ -109,7 +100,66 @@ public class EditProductActivity extends AppCompatActivity implements LoaderMana
         mSupplierNameSpinner.setOnTouchListener(mOnTouchListener);
         initSpinner();
 
+        mOnClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switch (v.getId()) {
+                    case R.id.call_supplier_btn:
+                        callSupplier();
+                        break;
+                    case R.id.edit_increase_quantity_btn:
+                        increateQuantity();
+                        break;
+                    case R.id.edit_decrease_quantity_btn:
+                        decreateQuantity();
+                        break;
+
+                }
+            }
+        };
+
+        mOrderFromSupplerBtn.setOnClickListener(mOnClickListener);
+        mIncreaseQuantity.setOnClickListener(mOnClickListener);
+        mDecreaseQuantity.setOnClickListener(mOnClickListener);
+
     }
+
+    private void callSupplier() {
+        String suppPhoneNumber = mSupplierPhoneEt.getText().toString().trim();
+        if (!Pattern.matches(ProductProvider.PHONE_REGEX, suppPhoneNumber)) {
+            Toast.makeText(getApplicationContext(), R.string.edit_dial_error_valid_phone, Toast.LENGTH_LONG).show();
+            return;
+        }
+        Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + suppPhoneNumber));
+        startActivity(intent);
+    }
+
+    private void increateQuantity() {
+        String quantity = mQuantityEt.getText().toString().trim();
+        if (!TextUtils.isEmpty(quantity)) {
+            int quantityInt = Integer.parseInt(quantity);
+            if (!TextUtils.isEmpty(mChangeQuantityByEt.getText().toString().trim())) {
+                int changeBy = Integer.parseInt(mChangeQuantityByEt.getText().toString().trim());
+                mQuantityEt.setText(String.valueOf(quantityInt + changeBy));
+                return;
+            }
+            mQuantityEt.setText(String.valueOf(quantityInt + 1));
+        }
+    }
+
+    private void decreateQuantity() {
+        String quantity = mQuantityEt.getText().toString().trim();
+        if (!TextUtils.isEmpty(quantity)) {
+            int quantityInt = Integer.parseInt(quantity);
+            if (!TextUtils.isEmpty(mChangeQuantityByEt.getText().toString().trim())) {
+                int changeBy = Integer.parseInt(mChangeQuantityByEt.getText().toString().trim());
+                mQuantityEt.setText(String.valueOf(quantityInt - changeBy));
+                return;
+            }
+            mQuantityEt.setText(String.valueOf(quantityInt - 1));
+        }
+    }
+
 
     private void initSpinner() {
         ArrayAdapter supplierNameSpinnerAdapter = ArrayAdapter.createFromResource(this, R.array.product_supplier_name_options, android.R.layout.simple_spinner_item);
@@ -237,43 +287,45 @@ public class EditProductActivity extends AppCompatActivity implements LoaderMana
 
     @Override
     public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
-            if (cursor == null || cursor.getCount() < 1) { return; }
-            if (cursor.moveToFirst()) {
-                int nameColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_PRODUCT_NAME);
-                int quantityColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_PRODUCT_QUANTITY);
-                int priceColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_PRODUCT_PRICE);
-                int idColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry._ID);
-                int supplierNameColIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_SUPPLIER_NAME);
-                int supplierPhoneColIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_SUPPLIER_PHONE_NUMBER);
+        if (cursor == null || cursor.getCount() < 1) {
+            return;
+        }
+        if (cursor.moveToFirst()) {
+            int nameColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_PRODUCT_NAME);
+            int quantityColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_PRODUCT_QUANTITY);
+            int priceColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_PRODUCT_PRICE);
+            int idColumnIndex = cursor.getColumnIndex(ProductsContract.ProductEntry._ID);
+            int supplierNameColIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_SUPPLIER_NAME);
+            int supplierPhoneColIndex = cursor.getColumnIndex(ProductsContract.ProductEntry.COLUMN_SUPPLIER_PHONE_NUMBER);
 
 
-                String name = cursor.getString(nameColumnIndex);
-                Float price = cursor.getFloat(priceColumnIndex);
-                int quantity = cursor.getInt(quantityColumnIndex);
-                int itemId = cursor.getInt(idColumnIndex);
-                String supplierName = cursor.getString(supplierNameColIndex);
-                String supplierPhone = cursor.getString(supplierPhoneColIndex);
+            String name = cursor.getString(nameColumnIndex);
+            Float price = cursor.getFloat(priceColumnIndex);
+            int quantity = cursor.getInt(quantityColumnIndex);
+            int itemId = cursor.getInt(idColumnIndex);
+            String supplierName = cursor.getString(supplierNameColIndex);
+            String supplierPhone = cursor.getString(supplierPhoneColIndex);
 
-                mNameEt.setText(name);
-                mPriceEt.setText(String.valueOf(price));
-                mQuantityEt.setText(String.valueOf(quantity));
-                mSupplierPhoneEt.setText(supplierPhone);
-                switch (supplierName) {
-                    case ProductsContract.ProductEntry.SUPPLIER_NAME_LOREAL:
-                        mSupplierNameSpinner.setSelection(0);
-                        break;
-                    case ProductsContract.ProductEntry.SUPPLIER_NAME_REVLON:
-                        mSupplierNameSpinner.setSelection(1);
-                        break;
-                    case ProductsContract.ProductEntry.SUPPLIER_NAME_NIVEA:
-                        mSupplierNameSpinner.setSelection(2);
-                        break;
-                    default:
-                        mSupplierNameSpinner.setSelection(0);
-                        break;
-                }
-
+            mNameEt.setText(name);
+            mPriceEt.setText(String.valueOf(price));
+            mQuantityEt.setText(String.valueOf(quantity));
+            mSupplierPhoneEt.setText(supplierPhone);
+            switch (supplierName) {
+                case ProductsContract.ProductEntry.SUPPLIER_NAME_LOREAL:
+                    mSupplierNameSpinner.setSelection(0);
+                    break;
+                case ProductsContract.ProductEntry.SUPPLIER_NAME_REVLON:
+                    mSupplierNameSpinner.setSelection(1);
+                    break;
+                case ProductsContract.ProductEntry.SUPPLIER_NAME_NIVEA:
+                    mSupplierNameSpinner.setSelection(2);
+                    break;
+                default:
+                    mSupplierNameSpinner.setSelection(0);
+                    break;
             }
+
+        }
     }
 
     @Override
@@ -305,15 +357,15 @@ public class EditProductActivity extends AppCompatActivity implements LoaderMana
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(R.string.dialog_message_unsaved_changes)
                 .setPositiveButton(getString(R.string.dialog_discard_btn), discadrButtonOnClickListener);
-                builder.setNegativeButton(getString(R.string.dialog_btn_keep_editing), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (dialog != null) {
-                            dialog.dismiss();
-                        }
-                    }
-                });
-                AlertDialog alertDialog = builder.create();
-                alertDialog.show();
+        builder.setNegativeButton(getString(R.string.dialog_btn_keep_editing), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+            }
+        });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
     }
 }
